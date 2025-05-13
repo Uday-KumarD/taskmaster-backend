@@ -6,7 +6,6 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
 const userRoutes = require('./routes/users');
-const http = require('http');
 const socketIo = require('socket.io');
 
 
