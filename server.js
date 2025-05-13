@@ -7,6 +7,7 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch((err) => console.error('MongoDB connection error:', err.message));
 
 const cors = require('cors');
+
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
@@ -32,12 +33,16 @@ app.use(cors({
 }));
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
-app.use('/api/tasks', (req, res, next) => {
+app.use('/auth', authRoutes);
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.error('MongoDB connection error:', err.message));
+
+app.use('/tasks', (req, res, next) => {
   req.io = io;
   next();
 }, taskRoutes);
-app.use('/api/users', userRoutes);
+app.use('/users', userRoutes);
 
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
@@ -53,4 +58,4 @@ io.on('connection', (socket) => {
 connectDB();
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
