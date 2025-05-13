@@ -8,8 +8,9 @@ const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware
 router.use(authMiddleware);
 
 router.post('/', roleMiddleware(['Admin', 'Manager']), async (req, res) => {
-  const { title, description, dueDate, priority, assignee } = req.body;
+  
   try {
+    const { title, description, dueDate, priority, assignee } = req.body;
     if (!title || !dueDate) {
       return res.status(400).json({ message: 'Title and due date are required' });
     }
@@ -55,8 +56,9 @@ router.post('/', roleMiddleware(['Admin', 'Manager']), async (req, res) => {
 });
 
 router.get('/', async (req, res) => {
-  const { search, status, priority, dueDate } = req.query;
+  
   try {
+    const { search, status, priority, dueDate } = req.query;
     const query = {};
     if (search) {
       query.$or = [
@@ -98,8 +100,9 @@ router.get('/:id', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-  const { title, description, dueDate, priority, status, assignee } = req.body;
+  
   try {
+    const { title, description, dueDate, priority, status, assignee } = req.body;
     const task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ message: 'Task not found' });
     if (req.user.role === 'User' && task.assignee?.toString() !== req.user._id.toString()) {

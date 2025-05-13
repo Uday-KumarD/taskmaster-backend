@@ -1,17 +1,19 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
+const connectDB = require('./config/db');
+const authRoutes = require('./routes/auth');
+const taskRoutes = require('./routes/tasks');
+const userRoutes = require('./routes/users');
+const http = require('http');
+const socketIo = require('socket.io');
+
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err.message));
 
-const cors = require('cors');
-
-const connectDB = require('./config/db');
-const authRoutes = require('./routes/auth');
-const taskRoutes = require('./routes/tasks');
-const userRoutes = require('./routes/users');
 const { Server } = require('socket.io');
 const http = require('http');
 const AuditLog = require('./models/AuditLog');
@@ -26,11 +28,16 @@ const io = new Server(server, {
   },
 });
 
+// CORS configuration
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
+  origin: process.env.FRONTEND_URL || 'https://taskmaster-frontend1.netlify.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
+// Handle preflight OPTIONS requests
+app.options('*', cors());
 app.use(express.json());
 
 app.use('/auth', authRoutes);
@@ -58,4 +65,4 @@ io.on('connection', (socket) => {
 connectDB();
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
